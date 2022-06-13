@@ -1,4 +1,5 @@
 curl -s https://raw.githubusercontent.com/github/linguist/master/lib/linguist/languages.yml > ./src/languages.yml
-cargo build
-strip ./target/debug/$(basename "$PWD")
-cp -f ./target/debug/$(basename "$PWD") ./
+MODE="release"  # previously: "debug"
+cargo build --$MODE
+strip ./target/$MODE/$(basename "$PWD")
+cp -f ./target/$MODE/$(basename "$PWD") ./
