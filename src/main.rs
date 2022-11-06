@@ -10,7 +10,7 @@ use std::path::Path;
 
 // crates imports
 extern crate clap;
-use clap::{Arg, App, SubCommand};
+use clap::{Arg, App, SubCommand, crate_version};
 // extern crate colors_transform;
 // use colors_transform::{Rgb, Color, Hsl};
 extern crate walkdir;
@@ -34,9 +34,9 @@ fn main () {
 	// defaults
 	// let dirname: &str = ".";
 	// let level: usize = 3;
-	
+
 	let matches = App::new("pere")
-                      .version("1.0")
+                      .version(crate_version!())
                       .author("Jake W. Ireland. <jakewilliami@icloud.com>")
                       .about("Lists directories and files how I like.  Name short for перечислять or (perechislyat'); that is, to enumerate/list.\n\nThe <DIR> argument defaults to your current directory.")
 							// .arg(Arg::with_name("help")
@@ -94,7 +94,7 @@ fn main () {
 	// if matches.is_present("STATUS") {
 	// 	status::get_git_status();
 	// };
-	
+
 	// // https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
 	// let language_data: serde_yaml::Mapping = parse_languages(LANGUAGE_FILE);
 	// // for i in language_data.into_iter() {
@@ -110,37 +110,37 @@ fn main () {
 	// // 	let ccode: String = l[lname][extensions];
 	// // 	println!("{:?}", ccode);
 	// // }
-	
+
 	// default to current directory
 	let dirname: &str = matches.value_of("DIR").unwrap_or(".");
 	// let level: usize = DEFAULT_DEPTH
 	// let level: usize = matches.value_of("LEVEL").unwrap_or(DEFAULT_DEPTH).parse().unwrap();
 	// let level: usize = matches.value_of("LEVEL").unwrap_or("")
-	
+
 	let level: usize;
-	
+
 	if matches.is_present("LEVEL") {
 		level = matches.value_of("LEVEL").unwrap().parse().unwrap();
 	} else {
 		level = DEFAULT_DEPTH;
 	}
-	
+
 	// if matches.is_present("DIR") {
 	// }
-	
+
 	let colmap: HashMap::<String, String> = construct_language_map(LANGUAGE_FILE);
-	
+
 	if matches.is_present("ALL") {
 		// if all is present the we no longer care about the level argument
 		// walkdir all the way
 		for entry in WalkDir::new(dirname)
 			.into_iter()
 			.filter_map(|e| e.ok()) {
-			
+
 			if entry.depth() == 0 {
 				continue
 			}
-			
+
 			let pathname = entry.path();
 			let isdir: bool = metadata(pathname).unwrap().is_dir();
 			println!("{:?}", pathname);
@@ -151,7 +151,7 @@ fn main () {
 			.max_depth(level)
 			.into_iter()
 			.filter_map(|e| e.ok()) {
-			
+
 			if entry.depth() == 0 {
 				continue
 			}
@@ -163,19 +163,19 @@ fn main () {
 	    	// println!("{}", entry?.path().display());
 		}
 	}
-	
-	
+
+
 	// for entry in WalkDir::new(DIRNAME).into_iter().filter_map(|e| e.ok()) {
 	// 	let pathname = entry.path();
 	// 	let isdir: bool = metadata(pathname).unwrap().is_dir();
 	// 	println!("{:?}", isdir);
     // 	// println!("{}", entry?.path().display());
 	// }
-	
+
 	// println!("{:?}", language_names);
 	// println!("{:?}", language_data["."]["extensions"]);
-	
-	
+
+
 }
 
 fn parse_path(p: walkdir::DirEntry, colmap: &HashMap::<String, String>) {
@@ -188,14 +188,14 @@ fn parse_path(p: walkdir::DirEntry, colmap: &HashMap::<String, String>) {
 	// let ext: Option<&OsStr> = Path::new(&pname).extension();
 	// print_type_of(&pname);
 	// println!("{}We are at depth {:?} for file {:?}, which is dir {:?}, with extension {:?}", indent, depth, pname, isdir, ext);
-	
-	
+
+
 }
 
 fn parse_languages(datafile: &str) -> serde_yaml::Mapping {
 	let f = std::fs::File::open(datafile).unwrap();
 	let data: serde_yaml::Mapping = serde_yaml::from_reader(f).unwrap();
-	
+
 	return data;
 }
 
@@ -203,11 +203,11 @@ fn construct_language_map(datafile: &str) -> HashMap::<String, String> {
 	// https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
 	let language_data: &serde_yaml::Mapping = &parse_languages(datafile);
 	// let language_names: Vec<serde_yaml::Value> = language_data.into_iter().map(|i| i.0).collect::<Vec<_>>();
-	
+
 	// print_type_of(&language_names);
-	
+
 	let mut colmap = HashMap::<String, String>::new();
-	
+
 	// We want to construct a hashmap with extensions in the keys, so that we can quickly reference it
 	// We actually don't care about the name of the lanuguage
 	// In previous implementations we would care about the name, to reference out textcolours.json, but now we only care about extension and hex colour code.
@@ -222,7 +222,7 @@ fn construct_language_map(datafile: &str) -> HashMap::<String, String> {
 		let hexcode = l.1.get("color").unwrap_or(default_ccode);
 		let rgbcode = Rgb::from_hex_str(hexcode.as_str().unwrap()).unwrap();
 		// print_type_of(exts);
-		
+
 		for e in exts.as_sequence().unwrap() {
 			println!("{:?} => {:?}", e, rgbcode);
 			colmap.insert(
@@ -234,7 +234,7 @@ fn construct_language_map(datafile: &str) -> HashMap::<String, String> {
 		// println!("{:?} => {:?}", l.0.as_str().unwrap(), exts);
 		// colmap.insert(lname, exts);
 	}
-	
+
 	return colmap;
 }
 
