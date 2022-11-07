@@ -104,18 +104,19 @@ fn main () {
 	// // }
 
 	// default to current directory
-	let dirname = if let Some(dir) = cli.dir {dir.as_str()} else {"."};
+	let dirname_string = cli.dir.unwrap_or(".".to_string());
+	let dirname = dirname_string.as_str();
 	// let level: usize = DEFAULT_DEPTH
 	// let level: usize = matches.value_of("LEVEL").unwrap_or(DEFAULT_DEPTH).parse().unwrap();
 	// let level: usize = matches.value_of("LEVEL").unwrap_or("")
 
-	let level: usize;
+	// let level: usize;
 
-	if let Some(level) = cli.level {
-		level = level;  // Reset global level (default, 2)
+	let level = if let Some(level) = cli.level {
+		level
 	} else {
-		level = DEFAULT_DEPTH;
-	}
+		DEFAULT_DEPTH
+	};
 
 	// if matches.is_present("DIR") {
 	// }
