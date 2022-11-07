@@ -1,15 +1,15 @@
 [package]
 name = "pere"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Jake W. Ireland <jakewilliami@icloud.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "2.33.3"
+clap = { version = "4.0.19", features = ["cargo", "wrap_help", "derive"] }
 colors-transform = "0.2.11"
-serde = "1.0.125"
-serde_yaml = "0.8.17"
+regex = "1.7.0"
+serde = "1.0.147"
+serde_yaml = "0.9.14"
 walkdir = "2.3.2"
-regex = "1.4.6"

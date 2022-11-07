@@ -10,7 +10,8 @@ use std::path::Path;
 
 // crates imports
 extern crate clap;
-use clap::{Arg, App, SubCommand, crate_version};
+use clap::{Arg, ArgAction, crate_version, Parser};
+
 // extern crate colors_transform;
 // use colors_transform::{Rgb, Color, Hsl};
 extern crate walkdir;
@@ -30,58 +31,50 @@ static DEFAULT_DEPTH: usize = 2;
 static LANGUAGE_FILE: &str = "/Users/jakeireland/projects/scripts/rust/pere/src/languages.yml";
 static TEXT_COLOUR: &str = "\u{001b}[0;38m";
 
+#[derive(Parser)]
+#[command(
+	name = "pere",
+	 author = "Jake·W.·Ireland.·<jakewilliami@icloud.com>",
+	version = crate_version!(),
+	about = "Lists directories and files how I like.",
+	long_about = "Lists directories and files how I like.  Name short for перечислять or (perechislyat'); that is, to enumerate/list.",
+)]
+struct Cli {
+	/// Descend starting at dir.  Defaults to the current directory
+	#[arg(
+		index = 1,
+		action = ArgAction::Set,
+		num_args = 0..=1,
+		value_name = "directory",
+	)]
+	dir: Option<String>,
+
+	/// Descend all levels from specified directory
+	#[arg(
+		short = 'a',
+		long = "all",
+		num_args = 0,
+	)]
+	all: Option<bool>,
+
+	/// Descend only <level> directories deep.  This option is ignored if -a is specified
+	#[arg(
+		short = 'L',
+		long = "level",
+		num_args = 1,
+		action = ArgAction::Set,
+		conflicts_with = "all",
+		value_parser = clap::value_parser!(usize),
+	)]
+	level: Option<usize>,
+}
+
 fn main () {
 	// defaults
 	// let dirname: &str = ".";
 	// let level: usize = 3;
 
-	let matches = App::new("pere")
-                      .version(crate_version!())
-                      .author("Jake W. Ireland. <jakewilliami@icloud.com>")
-                      .about("Lists directories and files how I like.  Name short for перечислять or (perechislyat'); that is, to enumerate/list.\n\nThe <DIR> argument defaults to your current directory.")
-							// .arg(Arg::with_name("help")
-							// 	.short("h")
-							// 	.long("help")
-							// 	// .value_name("FILE")
-							// 	.help("Shows help (present output).")
-							// 	.takes_value(false)
-							// 	.required(false)
-							// 	.multiple(false)
-						   	// )
-							.arg(Arg::with_name("DIR")
-								// .short("d")
-								// .long("dir")
-								.index(1)
-								.help("Descend starting at dir.")
-								// .takes_value(true)
-								.required(false)
-								.multiple(false)
-							)
-							.arg(Arg::with_name("ALL")
-								.short("a")
-								.long("all")
-								// .value_name("FILE")
-								.help("Descend all levels from specified directory")
-								.takes_value(false)
-								.required(false)
-								.multiple(false)
-						   	)
-							.arg(Arg::with_name("LEVEL")
-								.short("L")
-								.long("level")
-								// .value_name("FILE")
-								.help("Descend only level directories deep.")
-								.takes_value(true)
-								.required(false)
-								.multiple(false)
-						   	)
-							// .subcommand(SubCommand::with_name("test")
-							// 			.about("controls testing features")
-							// 			.version("1.3")
-							// 			.author("Someone E. <someone_else@other.com>")
-							// 			.arg_from_usage("-d, --debug 'Print debug information'"))
-							.get_matches();
-
+	let cli = Cli::parse();
 	// let arg = matches.value_of("config");
 	//
 	// println!("{:?}", matches);
@@ -112,25 +105,26 @@ fn main () {
 	// // }
 
 	// default to current directory
-	let dirname: &str = matches.value_of("DIR").unwrap_or(".");
+	let dirname_string = cli.dir.unwrap_or(".".to_string());
+	let dirname = dirname_string.as_str();
 	// let level: usize = DEFAULT_DEPTH
 	// let level: usize = matches.value_of("LEVEL").unwrap_or(DEFAULT_DEPTH).parse().unwrap();
 	// let level: usize = matches.value_of("LEVEL").unwrap_or("")
 
-	let level: usize;
+	// let level: usize;
 
-	if matches.is_present("LEVEL") {
-		level = matches.value_of("LEVEL").unwrap().parse().unwrap();
+	let level = if let Some(level) = cli.level {
+		level
 	} else {
-		level = DEFAULT_DEPTH;
-	}
+		DEFAULT_DEPTH
+	};
 
 	// if matches.is_present("DIR") {
 	// }
 
 	let colmap: HashMap::<String, String> = construct_language_map(LANGUAGE_FILE);
 
-	if matches.is_present("ALL") {
+	if let Some(all_levels) = cli.all {
 		// if all is present the we no longer care about the level argument
 		// walkdir all the way
 		for entry in WalkDir::new(dirname)
